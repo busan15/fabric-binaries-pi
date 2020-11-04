@@ -1,0 +1,33 @@
+diff --git a/images/fabric-ca/Dockerfile b/images/fabric-ca/Dockerfile
+index 3bd0467..7cfb084 100644
+--- a/images/fabric-ca/Dockerfile
++++ b/images/fabric-ca/Dockerfile
+@@ -6,14 +6,13 @@
+ ARG GO_VER
+ ARG ALPINE_VER
+ 
+-FROM golang:${GO_VER}-alpine as builder
++FROM golang:${GO_VER}-buster as builder
+ ARG GO_LDFLAGS
+ ARG GO_TAGS
+ 
+-RUN apk add --no-cache \
++RUN apt install -y \
+ 	gcc \
+-	git \
+-	musl-dev;
++	git;
+ 
+ ADD . $GOPATH/src/github.com/hyperledger/fabric-ca
+ RUN go install -tags "${GO_TAGS}" -ldflags "${GO_LDFLAGS}" \
+@@ -22,9 +21,7 @@ RUN go install -tags "${GO_TAGS}" -ldflags "${GO_LDFLAGS}" \
+ 	github.com/hyperledger/fabric-ca/cmd/fabric-ca-client
+ 
+ 
+-FROM alpine:${ALPINE_VER}
+-RUN apk add --no-cache \
+-	tzdata;
++FROM ubuntu:19.10
+ ENV FABRIC_CA_HOME /etc/hyperledger/fabric-ca-server
+ COPY --from=builder /go/bin /usr/local/bin
+ EXPOSE 7054

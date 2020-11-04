@@ -6,8 +6,20 @@ This repository provides precompiled Fabric binaries (based on Fabric v2.1) for 
 
 The binaries are distributed with a copy of https://github.com/hyperledger/fabric-samples that has been modified to use the ARM docker images.
 
+## Compiling the images
 
-## How to setup Hyperledger Fabric on a Raspberry Pi
+There are also a set of patch files in this repository that contains the changes made to the source code of fabric, fabric-baseimage, and fabric-ca to make these compile on ARM They likely have to be applied to the exact commit they were made for to avoid conflicts though.
+
+These are:
+
+* fabric: f7f505bd76ae72526c17a255f970a0114dea19b6
+(https://github.com/hyperledger/fabric/tree/f7f505bd76ae72526c17a255f970a0114dea19b6)
+* fabric-baseimage: 12718aaae2e45f4c69043073292c9ff8850bbc57 (https://github.com/hyperledger/fabric-baseimage/tree/12718aaae2e45f4c69043073292c9ff8850bbc57)
+* fabric-ca: 34c5a3c5223e461e8a239e30bd4420026da2fd0a (https://github.com/hyperledger/fabric-ca/tree/34c5a3c5223e461e8a239e30bd4420026da2fd0a)
+
+To apply these changes and also update to a later version, you could probably (for each of these three) clone the repository, checkout the commit specified above, apply the corresponding patch with `git apply <patch file>`, commit or stash the changes, and then update with `git pull`. This might cause conflicts, so if you are happy with an older version you could also stop after applying the patches and compile from there.
+
+## How to setup Hyperledger Fabric on a Raspberry Pi (using the precompiled images)
 
 Using the binaries and modified fabric-samples provided here, getting Fabric to run on a Raspberry Pi or other AArch64-powered systems can be done using the following steps:
 

@@ -1,0 +1,46 @@
+diff --git a/config/baseimage/Dockerfile b/config/baseimage/Dockerfile
+index afe69c3..769c0c6 100644
+--- a/config/baseimage/Dockerfile
++++ b/config/baseimage/Dockerfile
+@@ -3,7 +3,7 @@
+ #
+ # SPDX-License-Identifier: Apache-2.0
+ #
+-FROM adoptopenjdk:8u222-b10-jdk-openj9-0.15.1
++FROM adoptopenjdk:8-jdk-hotspot-bionic
+ COPY scripts /tmp/scripts
+ RUN cd /tmp/scripts && \
+     common/packages.sh && \
+diff --git a/scripts/common/setup.sh b/scripts/common/setup.sh
+index 583ee7f..9ba8e7e 100755
+--- a/scripts/common/setup.sh
++++ b/scripts/common/setup.sh
+@@ -44,16 +44,16 @@ if echo $BINTARGETS | grep -q `uname -m`; then
+ # Otherwise, build Golang from source
+ else
+    # Install Golang 1.6 binary as a bootstrap to compile the Golang GO_VER source
+-   apt-get -y install golang-1.6
++   apt-get -y install golang
+ 
+    cd /tmp
+    wget --quiet --no-check-certificate https://storage.googleapis.com/golang/go${GO_VER}.src.tar.gz
+    tar -xzf go${GO_VER}.src.tar.gz -C /opt
+ 
+    cd $GOROOT/src
+-   export GOROOT_BOOTSTRAP="/usr/lib/go-1.6"
++   export GOROOT_BOOTSTRAP="/usr/lib/go"
+    ./make.bash
+-   apt-get -y remove golang-1.6
++   apt-get -y remove golang
+ fi
+ 
+ PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+@@ -70,7 +70,7 @@ EOF
+ NODE_VER=8.16.1
+ NPM_VER=6.11.3
+ 
+-ARCH=`uname -m | sed 's|i686|x86|' | sed 's|x86_64|x64|'`
++ARCH=`uname -m | sed 's|i686|x86|' | sed 's|x86_64|x64|' | sed 's|aarch64|arm64|'`
+ NODE_PKG=node-v$NODE_VER-linux-$ARCH.tar.gz
+ SRC_PATH=/tmp/$NODE_PKG
+ 

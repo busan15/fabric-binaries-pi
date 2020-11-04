@@ -1,0 +1,112 @@
+diff --git a/images/ccenv/Dockerfile b/images/ccenv/Dockerfile
+index 1553fddf4..17a09d341 100644
+--- a/images/ccenv/Dockerfile
++++ b/images/ccenv/Dockerfile
+@@ -8,6 +8,7 @@ FROM golang:${GO_VER}-alpine${ALPINE_VER}
+ RUN apk add --no-cache \
+ 	g++ \
+ 	gcc \
++	binutils-gold \
+ 	git \
+ 	musl-dev
+ 
+diff --git a/images/orderer/Dockerfile b/images/orderer/Dockerfile
+index 549464a1d..af5e16be9 100644
+--- a/images/orderer/Dockerfile
++++ b/images/orderer/Dockerfile
+@@ -10,6 +10,7 @@ RUN apk add --no-cache tzdata
+ FROM golang:${GO_VER}-alpine${ALPINE_VER} as golang
+ RUN apk add --no-cache \
+ 	gcc \
++	binutils-gold \
+ 	musl-dev \
+ 	git \
+ 	bash \
+diff --git a/images/peer/Dockerfile b/images/peer/Dockerfile
+index 19ce91400..5e79a04d9 100644
+--- a/images/peer/Dockerfile
++++ b/images/peer/Dockerfile
+@@ -5,16 +5,15 @@
+ ARG GO_VER
+ ARG ALPINE_VER
+ 
+-FROM alpine:${ALPINE_VER} as peer-base
+-RUN apk add --no-cache tzdata
++FROM ubuntu as peer-base
+ 
+-FROM golang:${GO_VER}-alpine${ALPINE_VER} as golang
+-RUN apk add --no-cache \
++FROM golang:${GO_VER}-buster as golang
++RUN apt install -y \
+ 	bash \
+ 	gcc \
++	binutils \
+ 	git \
+-	make \
+-	musl-dev
++	make
+ ADD . $GOPATH/src/github.com/hyperledger/fabric
+ WORKDIR $GOPATH/src/github.com/hyperledger/fabric
+ 
+diff --git a/images/tools/Dockerfile b/images/tools/Dockerfile
+index eb3c154ba..fea18e9ab 100644
+--- a/images/tools/Dockerfile
++++ b/images/tools/Dockerfile
+@@ -4,14 +4,13 @@
+ 
+ ARG GO_VER
+ ARG ALPINE_VER
+-FROM golang:${GO_VER}-alpine${ALPINE_VER} as golang
++FROM golang:${GO_VER}-buster as golang
+ 
+-RUN apk add --no-cache \
++RUN apt install -y \
+ 	bash \
+ 	gcc \
+ 	git \
+-	make \
+-	musl-dev;
++	make;
+ 
+ ADD . $GOPATH/src/github.com/hyperledger/fabric
+ WORKDIR $GOPATH/src/github.com/hyperledger/fabric
+@@ -19,13 +18,11 @@ WORKDIR $GOPATH/src/github.com/hyperledger/fabric
+ FROM golang as tools
+ RUN make configtxgen configtxlator cryptogen peer discover idemixgen
+ 
+-FROM golang:${GO_VER}-alpine
++FROM golang:${GO_VER}-buster
+ # git is required to support `go list -m`
+-RUN apk add --no-cache \
++RUN apt install -y \
+ 	bash \
+-	git \
+-	jq \
+-	tzdata;
++	git;
+ ENV FABRIC_CFG_PATH /etc/hyperledger/fabric
+ VOLUME /etc/hyperledger/fabric
+ COPY --from=tools /go/src/github.com/hyperledger/fabric/build/bin /usr/local/bin
+diff --git a/sampleconfig/core.yaml b/sampleconfig/core.yaml
+index 6ef6641e1..5f3475e08 100644
+--- a/sampleconfig/core.yaml
++++ b/sampleconfig/core.yaml
+@@ -83,7 +83,7 @@ peer:
+         # Important: The endpoints here have to be endpoints of peers in the same
+         # organization, because the peer would refuse connecting to these endpoints
+         # unless they are in the same organization as the peer.
+-        bootstrap: 127.0.0.1:7051
++        #bootstrap: 127.0.0.1:7051
+ 
+         # NOTE: orgLeader and useLeaderElection parameters are mutual exclusive.
+         # Setting both to true would result in the termination of the peer
+@@ -492,7 +492,8 @@ vm:
+                 Config:
+                     max-size: "50m"
+                     max-file: "5"
+-            Memory: 2147483648
++            #Memory: 2147483648
++            Memory: 16777216
+ 
+ ###############################################################################
+ #
